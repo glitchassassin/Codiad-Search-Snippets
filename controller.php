@@ -1,0 +1,61 @@
+<?php
+
+    /*
+     *  Modified extension of the Filemanager controller
+     *  Only handles 
+     */
+
+    require_once('../../common.php');
+    require_once('class.searchsnippets.php');
+
+    //////////////////////////////////////////////////////////////////
+    // Verify Session or Key
+    //////////////////////////////////////////////////////////////////
+
+    checkSession();
+
+    //////////////////////////////////////////////////////////////////
+    // Get Action
+    //////////////////////////////////////////////////////////////////
+
+    if(!empty($_GET['action'])){ $action = $_GET['action']; }
+    else{ exit('{"status":"error","data":{"error":"No Action Specified"}}'); }
+
+    //////////////////////////////////////////////////////////////////
+    // Ensure Project Has Been Loaded
+    //////////////////////////////////////////////////////////////////
+
+    if(!isset($_SESSION['project'])){
+        $_GET['action']='get_current';
+        $_GET['no_return']='true';
+        require_once('../project/controller.php');
+    }
+    
+    //////////////////////////////////////////////////////////////////
+    // Security Check
+    //////////////////////////////////////////////////////////////////   
+
+    if (!checkPath($_GET['path'])) {
+        die('{"status":"error","message":"Invalid Path"}');
+    }
+
+    //////////////////////////////////////////////////////////////////
+    // Define Root
+    //////////////////////////////////////////////////////////////////
+
+    $_GET['root'] = WORKSPACE;
+
+    //////////////////////////////////////////////////////////////////
+    // Handle Action
+    //////////////////////////////////////////////////////////////////
+
+    $SearchSnippets = new SearchSnippets($_GET,$_POST,$_FILES);
+    $SearchSnippets->project = @$_SESSION['project']['path'];
+
+    switch($action){
+        case 'search': $SearchSnippets->search(); break;
+        default: exit('{"status":"fail","data":{"error":"Unknown Action"}}');
+    }
+
+
+?>
